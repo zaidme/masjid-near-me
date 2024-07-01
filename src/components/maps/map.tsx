@@ -1,10 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 
 const Map = () => {
-  const mapRef = React.useRef<HTMLDivElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
+      navigator.geolocation.getCurrentPosition(({ coords }) => {
+        const { latitude, longitude } = coords;
+        setLocation({ latitude, longitude });
+        
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -12,16 +24,17 @@ const Map = () => {
         apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
         version: "weekly",
       });
+      console.log(location)
 
       const { Map } = await loader.importLibrary("maps");
 
       //initialize a marker
 
-      const {AdvancedMarkerElement} = await loader.importLibrary("marker") 
+      const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
       const position = {
-        lat: 43.642693,
-        lng: -79.3871189,
+        lat: location.latitude,
+        lng: location.longitude,
       };
 
       // map options:
@@ -29,23 +42,23 @@ const Map = () => {
         center: position,
         zoom: 16,
         mapId: "MY_NEXTJS_MAPID", //GENERATE SOMETING FOR TIS
-      }
+      };
 
       // set up the map:
       const map = new Map(mapRef.current as HTMLDivElement, mapOptions);
 
       const marker = new AdvancedMarkerElement({
         map: map,
-        position: position
-      })
+        position: position,
+      });
     };
 
-    initializeMap();
-  }, []);
+    if (location.latitude !== 0 && location.longitude !== 0) {
+      initializeMap();
+    }
+  }, [location]);
 
-  return <div style={{ height: "600px" }} ref={mapRef}/>
-
- 
+  return <div style={{ height: "600px" }} ref={mapRef} />;
 };
 
 export default Map;
