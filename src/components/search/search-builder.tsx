@@ -8,6 +8,17 @@ import { generateForm } from "@/lib/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import FormContainer from "../ui/form-container";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+
 
 const SearchBuilder = () => {
   const { form, schema } = generateForm({
@@ -16,29 +27,29 @@ const SearchBuilder = () => {
     }),
   });
 
- 
-
   type FormInference = z.infer<typeof schema>;
 
-  const onSubmit = async (data: FormInference) => {
-   
-  };
+  const onSubmit = async (data: FormInference) => {};
 
   return (
-    
-      <FormContainer>
-      <Form
-        form={form}
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground space-y-4"
-      >
-        <Label> Search for a Trade worker near u</Label>
-        <Input placeholder="plumber near u"/>
-        <Button type = "submit"> Submit </Button>
-        
-      </Form>
-      </FormContainer>
-   
+    <Drawer>
+      <DrawerTrigger>Open</DrawerTrigger>
+      <DrawerContent>
+      <div className="mx-auto w-full max-w-sm">
+        <DrawerHeader>
+          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+          <DrawerDescription>This action cannot be undone.</DrawerDescription>
+        </DrawerHeader>
+        <DrawerFooter>
+          <Button>Submit</Button>
+          <DrawerClose>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
+     
   );
 };
 
