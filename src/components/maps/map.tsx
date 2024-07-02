@@ -2,10 +2,29 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
+import { Form } from "../ui/form";
+import { Label } from "../ui/label";
+import { Button } from "../ui/button";
+import { generateForm } from "@/lib/form";
+import { z } from "zod";
+import { Input } from "../ui/input";
 
 const Map = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+
+  const { form, schema } = generateForm({
+    schema: z.object({
+      search: z.string().min(1),
+    }),
+  });
+
+  type FormInference = z.infer<typeof schema>;
+
+  const onSubmit = async (data: FormInference) => {
+    console.log("submitted!")
+    console.log(data)
+  };
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -13,7 +32,6 @@ const Map = () => {
       navigator.geolocation.getCurrentPosition(({ coords }) => {
         const { latitude, longitude } = coords;
         setLocation({ latitude, longitude });
-        
       });
     }
   }, []);
@@ -24,7 +42,6 @@ const Map = () => {
         apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
         version: "weekly",
       });
-      console.log(location)
 
       const { Map } = await loader.importLibrary("maps");
 
@@ -33,9 +50,11 @@ const Map = () => {
       const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
       const position = {
-        lat: location.latitude,
-        lng: location.longitude,
+        lat: Number(location.latitude.toFixed(2)),
+        lng: Number(location.longitude.toFixed(2)),
       };
+
+      console.log(position);
 
       // map options:
       const mapOptions: google.maps.MapOptions = {
@@ -58,7 +77,26 @@ const Map = () => {
     }
   }, [location]);
 
-  return <div style={{ height: "600px" }} ref={mapRef} />;
+  return (
+    <>
+      <div className="event__search__floater">
+        <div className="search__anchor">
+          <Form form={form} onSubmit={form.handleSubmit(onSubmit)}>
+            <input
+              type="text"
+              className="search__bar"
+              placeholder="Search Event"
+             
+            />
+            <Input className="search__submit" type="submit"  field = 'search'/>
+            <Button type="submit"/>
+            <div className="search__toggler"></div>
+          </Form>
+        </div>
+      </div>
+      <div className="map-container" ref={mapRef} />
+    </>
+  );
 };
 
 export default Map;
