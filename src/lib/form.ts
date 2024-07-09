@@ -38,6 +38,7 @@ export const generateForm = ({
 	schema,
 	defaultValues = {},
 }: GenerateFormParams) => {
+	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const form = useForm({
 		resolver: zodResolver(schema),
 		defaultValues: generateDefaultValues(schema, defaultValues),

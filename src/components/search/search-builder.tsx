@@ -19,17 +19,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
+interface SearchBuilderProps{
+  open:boolean
+}
 
 const SearchBuilder = () => {
-  const { form, schema } = generateForm({
-    schema: z.object({
-      name: z.string().min(1),
-    }),
-  });
 
-  type FormInference = z.infer<typeof schema>;
-
-  const onSubmit = async (data: FormInference) => {};
 
   return (
     <Drawer>
