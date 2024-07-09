@@ -3,8 +3,8 @@ import { Label } from './ui/label'
 
 const TopBar = () => {
   return (
-    <div>
-        <Label> Good day, </Label>
+    <div className='flex justify-center items-center w-[40%]'>
+        <Label className='justify-left text-xl font-bold font-sans'>Assalamualaikum,</Label>
     </div>
   )
 }

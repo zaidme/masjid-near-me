@@ -17,6 +17,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Label } from "../ui/label";
 
 const Map = () => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -34,6 +35,7 @@ const Map = () => {
   const { form, schema } = generateForm({
     schema: z.object({
       search: z.string().min(1),
+      radius: z.string().min(1),
     }),
   });
 
@@ -42,7 +44,7 @@ const Map = () => {
   const onSubmit = (data: FormInference) => {
     console.log("submitted!");
     console.log(data);
-    useEffect(() => {});
+    setLoading(true);
     if (service && map) {
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ address: data.search }, (results, status) => {
@@ -56,7 +58,7 @@ const Map = () => {
 
           const request = {
             location: location,
-            radius: 5000,
+            radius: Number(data.radius)*1000,
             type: "mosque",
           };
 
@@ -79,6 +81,8 @@ const Map = () => {
         }
       });
     }
+    setLoading(false);
+    setDrawerOpen(false);
   };
 
   const createMarker = (place: google.maps.places.PlaceResult) => {
@@ -91,6 +95,7 @@ const Map = () => {
 
     google.maps.event.addListener(marker, "click", () => {
       setSelectedPlace(place);
+      console.log(place);
       setDrawerOpen(true);
     });
   };
@@ -126,7 +131,7 @@ const Map = () => {
 
       const mapOptions: google.maps.MapOptions = {
         center: position,
-        zoom: 16,
+        zoom: 13,
         mapId: "MY_NEXTJS_MAPID",
       };
 
@@ -144,39 +149,67 @@ const Map = () => {
 
   return (
     <>
-      <div className="map-container" ref={mapRef} />
-      <div>
-        <Form form={form} onSubmit={form.handleSubmit(onSubmit)}>
-          <Input
-            placeholder="Enter an address"
-            className="z-10"
-            type="search"
-            field="search"
-            control={form.control}
-          ></Input>
-          <Button type="submit" variant="primary" loading={loading}>
-            Submit
-          </Button>
-        </Form>
-        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <DrawerTrigger asChild>
-            <Button variant="ghost">Open Drawer</Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <div className="mx-auto w-full max-w-sm">
-              <DrawerHeader>
-                <DrawerTitle>{selectedPlace?.name}</DrawerTitle>
-                <DrawerDescription>
-                  {selectedPlace?.vicinity || "No address available"}
-                </DrawerDescription>
-              </DrawerHeader>
-              <DrawerFooter>
-                <Button onClick={() => setDrawerOpen(false)}>Close</Button>
-              </DrawerFooter>
-            </div>
-          </DrawerContent>
-        </Drawer>
+      <div className="w-full flex items-center justify-center mb-6">
+        <div className="map-container w-[85%] rounded-md" ref={mapRef} />
       </div>
+      <Drawer>
+        <div className="items-center flex justify-center">
+          <DrawerTrigger asChild>
+            <Button >Where we prayin?</Button>
+          </DrawerTrigger>
+        </div>
+
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerTitle>Enter your search</DrawerTitle>
+            <DrawerHeader>
+              <DrawerDescription>
+                <Form form={form} onSubmit={form.handleSubmit(onSubmit)}>
+                  <Input
+                    placeholder="Enter an address"
+                    className="z-10"
+                    type="search"
+                    field="search"
+                    control={form.control}
+                  ></Input>
+                   <Input
+                    placeholder="Enter a search radius (capped at 10km)"
+                    className="z-10"
+                    type="radius"
+                    field="radius"
+                    control={form.control}
+                    
+                  ></Input>
+
+                  <Button type="submit" variant="primary" loading={loading}>
+                    Submit
+                  </Button>
+                </Form>
+              </DrawerDescription>
+            </DrawerHeader>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>{selectedPlace?.name}</DrawerTitle>
+              <DrawerDescription>
+                <div className="justify-left items-left flex flex-col">
+                <Label className="mb-4">{selectedPlace?.vicinity +"\n" || "No address available \n"}</Label>
+                <Label>{selectedPlace?.rating + " stars" || "No rating available"}</Label> 
+                </div>
+                
+              </DrawerDescription>
+            </DrawerHeader>
+            <DrawerFooter>
+              <Button onClick={() => setDrawerOpen(false)}>Close</Button>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 };
